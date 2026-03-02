@@ -6,6 +6,7 @@ import BN from "bn.js";
 export enum Preset {
   SSS1 = "sss1",
   SSS2 = "sss2",
+  SSS3 = "sss3",
 }
 
 // ─── On-chain Account Types ───────────────────────────────────────────────────
@@ -126,6 +127,85 @@ export interface SupplyInfo {
   cap: BN;
   capped: boolean;
   utilizationPct: number;
+}
+
+// ─── SSS-3 On-chain Account Types ────────────────────────────────────────────
+
+export interface Sss3Config {
+  mint: PublicKey;
+  allowlistAuthority: PublicKey;
+  requireAllowlistForReceive: boolean;
+  requireAllowlistForSend: boolean;
+  confidentialTransfersEnabled: boolean;
+  autoApproveNewAccounts: boolean;
+  auditorPubkey: Uint8Array | null; // 32 bytes ElGamal pubkey, or null
+  allowlistCount: number;
+  bump: number;
+}
+
+export interface Sss3AllowlistRecord {
+  mint: PublicKey;
+  wallet: PublicKey;
+  addedAt: BN;
+  expiresAt: BN; // 0 = no expiry
+  addedBy: PublicKey;
+  active: boolean;
+  note: string; // UTF-8 decoded from [u8; 64]
+  bump: number;
+}
+
+// ─── SSS-3 Parameter Types ────────────────────────────────────────────────────
+
+export interface Sss3Params {
+  name: string;
+  symbol: string;
+  decimals: number;
+  supplyCap: BN;
+  allowlistAuthority: PublicKey;
+  requireAllowlistForReceive: boolean;
+  requireAllowlistForSend: boolean;
+  confidentialTransfersEnabled: boolean;
+  autoApproveNewAccounts: boolean;
+  auditorPubkey?: Uint8Array; // 32-byte ElGamal pubkey
+}
+
+export interface AllowlistEntryParams {
+  expiry: BN; // 0 = no expiry
+  note: string; // max 64 bytes UTF-8
+}
+
+// ─── SSS-3 SDK Return Types ───────────────────────────────────────────────────
+
+export interface Sss3Info {
+  address: PublicKey;
+  mint: PublicKey;
+  config: Sss3Config;
+  allowlistCount: number;
+}
+
+export interface AllowlistStatus {
+  wallet: PublicKey;
+  isAllowlisted: boolean;
+  record: Sss3AllowlistRecord | null;
+  isExpired: boolean;
+}
+
+// ─── SSS-3 Events ─────────────────────────────────────────────────────────────
+
+export interface AllowlistUpdatedEvent {
+  mint: PublicKey;
+  wallet: PublicKey;
+  action: 0 | 1; // 0=removed, 1=added
+  actor: PublicKey;
+  timestamp: BN;
+}
+
+export interface ConfidentialMintInitiatedEvent {
+  mint: PublicKey;
+  recipientAllowlistRecord: PublicKey;
+  commitmentHash: Uint8Array; // [u8; 32]
+  initiator: PublicKey;
+  timestamp: BN;
 }
 
 // ─── Events ───────────────────────────────────────────────────────────────────

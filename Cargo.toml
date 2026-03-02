@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = [
+    "programs/solana-stablecoin-standard",
+    "trident-tests/fuzz_tests/fuzz_0",
+    "trident-tests/fuzz_tests/fuzz_1",
+    "trident-tests/fuzz_tests/fuzz_2",
+]

@@ -42,4 +42,20 @@ export class PDAs {
       this.programId
     );
   }
+
+  // ─── SSS-3 PDAs ──────────────────────────────────────────────────────────────
+
+  sss3Config(mint: PublicKey): [PublicKey, number] {
+    return PublicKey.findProgramAddressSync(
+      [Buffer.from("sss3-config"), mint.toBuffer()],
+      this.programId
+    );
+  }
+
+  sss3Allowlist(mint: PublicKey, wallet: PublicKey): [PublicKey, number] {
+    return PublicKey.findProgramAddressSync(
+      [Buffer.from("sss3-allowlist"), mint.toBuffer(), wallet.toBuffer()],
+      this.programId
+    );
+  }
 }
