@@ -5,6 +5,7 @@ pub mod freeze;
 pub mod initialize;
 pub mod mint;
 pub mod seize;
+pub mod sss3;
 pub mod transfer;
 pub mod whitelist;
 
@@ -15,5 +16,6 @@ pub use freeze::*;
 pub use initialize::*;
 pub use mint::*;
 pub use seize::*;
+pub use sss3::*;
 pub use transfer::*;
 pub use whitelist::*;

@@ -47,6 +47,25 @@ pub enum SssError {
     #[msg("Address is not on the whitelist")]
     NotWhitelisted,
 
+    // ─── SSS-3 Allowlist ──────────────────────────────────────────────────────
+    #[msg("SSS-3 feature not available on this preset")]
+    NotSss3,
+
+    #[msg("Recipient is not on the SSS-3 allowlist")]
+    RecipientNotAllowlisted,
+
+    #[msg("Sender is not on the SSS-3 allowlist")]
+    SenderNotAllowlisted,
+
+    #[msg("Allowlist entry has expired")]
+    AllowlistExpired,
+
+    #[msg("Address is not on the allowlist")]
+    NotAllowlisted,
+
+    #[msg("Confidential transfers not enabled for this mint")]
+    ConfidentialTransfersDisabled,
+
     // ─── Admin ────────────────────────────────────────────────────────────────
     #[msg("New supply cap cannot be lower than current circulating supply")]
     SupplyCapBelowCirculating,

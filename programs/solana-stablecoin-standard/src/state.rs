@@ -5,6 +5,7 @@ use anchor_lang::prelude::*;
 pub enum Preset {
     Sss1, // Minimal
     Sss2, // Compliant
+    Sss3, // Private (allowlist-gated + confidential transfers)
 }
 
 impl Default for Preset {
@@ -54,6 +55,10 @@ pub struct StablecoinConfig {
 }
 
 impl StablecoinConfig {
+    pub fn is_sss3(&self) -> bool {
+        self.preset == Preset::Sss3
+    }
+
     pub const LEN: usize = 8  // discriminator
         + 1   // preset
         + 32  // mint
@@ -272,4 +277,97 @@ pub struct ComplianceEventData {
     pub subject: Pubkey,
     pub amount: Option<u64>,
     pub note: [u8; 128],
+}
+
+// ─── SSS-3 State ──────────────────────────────────────────────────────────────
+
+/// SSS-3 specific configuration
+///
+/// PDA: ["sss3-config", mint]
+/// Only created for SSS-3 stablecoins.
+#[account]
+#[derive(Default)]
+pub struct Sss3Config {
+    /// Associated stablecoin mint
+    pub mint: Pubkey,
+    /// Authority who can add/remove allowlist entries
+    pub allowlist_authority: Pubkey,
+    /// If true, only allowlisted addresses may receive tokens
+    pub require_allowlist_for_receive: bool,
+    /// If true, only allowlisted addresses may send tokens
+    pub require_allowlist_for_send: bool,
+    /// Whether Token-2022 confidential transfers are enabled for this mint
+    pub confidential_transfers_enabled: bool,
+    /// If true, new token accounts are auto-approved for confidential transfers
+    pub auto_approve_new_accounts: bool,
+    /// Optional auditor ElGamal pubkey for decrypt-on-demand (32 bytes, None = no auditor)
+    pub auditor_pubkey: Option<[u8; 32]>,
+    /// Total allowlist entries
+    pub allowlist_count: u32,
+    /// Bump seed
+    pub bump: u8,
+}
+
+impl Sss3Config {
+    pub const LEN: usize = 8   // discriminator
+        + 32  // mint
+        + 32  // allowlist_authority
+        + 1   // require_allowlist_for_receive
+        + 1   // require_allowlist_for_send
+        + 1   // confidential_transfers_enabled
+        + 1   // auto_approve_new_accounts
+        + 33  // auditor_pubkey (Option<[u8;32]>)
+        + 4   // allowlist_count
+        + 1;  // bump
+}
+
+/// SSS-3 Allowlist Record
+///
+/// PDA: ["sss3-allowlist", mint, wallet]
+/// Separate from SSS-2 KYC whitelist — access-control focused rather than compliance.
+#[account]
+pub struct AllowlistRecord {
+    /// Associated stablecoin mint
+    pub mint: Pubkey,
+    /// Allowlisted wallet
+    pub wallet: Pubkey,
+    /// When added (Unix timestamp)
+    pub added_at: i64,
+    /// Expiry (0 = no expiry)
+    pub expires_at: i64,
+    /// Who added this entry
+    pub added_by: Pubkey,
+    /// Is active
+    pub active: bool,
+    /// Optional note (e.g. "institutional partner A")
+    pub note: [u8; 64],
+    /// Bump seed
+    pub bump: u8,
+}
+
+impl AllowlistRecord {
+    pub const LEN: usize = 8   // discriminator
+        + 32  // mint
+        + 32  // wallet
+        + 8   // added_at
+        + 8   // expires_at
+        + 32  // added_by
+        + 1   // active
+        + 64  // note
+        + 1;  // bump
+}
+
+/// SSS-3 initialization params
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct Sss3Params {
+    pub name: [u8; 32],
+    pub symbol: [u8; 8],
+    pub decimals: u8,
+    pub supply_cap: u64,
+    pub allowlist_authority: Pubkey,
+    pub require_allowlist_for_receive: bool,
+    pub require_allowlist_for_send: bool,
+    pub confidential_transfers_enabled: bool,
+    pub auto_approve_new_accounts: bool,
+    pub auditor_pubkey: Option<[u8; 32]>,
 }

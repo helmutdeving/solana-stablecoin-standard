@@ -89,3 +89,24 @@ pub struct PresetUpgraded {
     pub admin: Pubkey,
     pub timestamp: i64,
 }
+
+// ─── SSS-3 Events ─────────────────────────────────────────────────────────────
+
+#[event]
+pub struct AllowlistUpdated {
+    pub mint: Pubkey,
+    pub wallet: Pubkey,
+    pub action: u8, // 0 = removed, 1 = added
+    pub actor: Pubkey,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct ConfidentialMintInitiated {
+    pub mint: Pubkey,
+    pub recipient_allowlist_record: Pubkey,
+    /// Pedersen commitment hash (ElGamal ciphertext commitment of minted amount)
+    pub commitment_hash: [u8; 32],
+    pub initiator: Pubkey,
+    pub timestamp: i64,
+}

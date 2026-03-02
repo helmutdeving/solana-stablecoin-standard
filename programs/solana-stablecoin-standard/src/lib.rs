@@ -12,14 +12,16 @@ declare_id!("SSSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
 /// Solana Stablecoin Standard (SSS)
 ///
-/// A modular on-chain framework supporting two compliance tiers:
+/// A modular on-chain framework supporting three compliance tiers:
 ///   - SSS-1: Minimal preset — basic mint/burn, supply tracking, no regulatory overhead
 ///   - SSS-2: Compliant preset — adds KYC whitelist, freeze/seize, compliance reporting
+///   - SSS-3: Private preset (experimental) — allowlist-gated + Token-2022 confidential transfers
 ///
 /// Architecture layers:
 ///   L1 — Core ledger: mint authority, burn authority, supply cap
 ///   L2 — Compliance hooks: whitelist registry, freeze registry (SSS-2 only)
-///   L3 — Governance: admin multi-sig, preset upgrade path
+///   L3 — Privacy layer: allowlist registry, confidential transfer extension (SSS-3 only)
+///   L4 — Governance: admin multi-sig, preset upgrade path
 #[program]
 pub mod solana_stablecoin_standard {
     use super::*;
@@ -112,5 +114,46 @@ pub mod solana_stablecoin_standard {
         compliance_params: Sss2ComplianceParams,
     ) -> Result<()> {
         instructions::admin::handler_upgrade_to_sss2(ctx, compliance_params)
+    }
+
+    // ─── SSS-3: Private preset (experimental) ────────────────────────────────
+
+    /// Initialize a new SSS-3 stablecoin (allowlist-gated + confidential transfers)
+    ///
+    /// The mint should have Token-2022 ConfidentialTransfer extension pre-initialized
+    /// using the SDK helper `initializeConfidentialMint()` before calling this instruction.
+    pub fn initialize_sss3(
+        ctx: Context<InitializeSss3>,
+        params: Sss3Params,
+    ) -> Result<()> {
+        instructions::sss3::handler_sss3(ctx, params)
+    }
+
+    /// Add a wallet to the SSS-3 allowlist
+    pub fn allowlist_add(
+        ctx: Context<AllowlistAdd>,
+        expiry: i64,
+        note: [u8; 64],
+    ) -> Result<()> {
+        instructions::sss3::handler_allowlist_add(ctx, expiry, note)
+    }
+
+    /// Remove a wallet from the SSS-3 allowlist
+    pub fn allowlist_remove(ctx: Context<AllowlistRemove>) -> Result<()> {
+        instructions::sss3::handler_allowlist_remove(ctx)
+    }
+
+    /// Transfer with SSS-3 allowlist enforcement (standard amounts)
+    pub fn transfer_sss3(ctx: Context<TransferSss3>, amount: u64) -> Result<()> {
+        instructions::sss3::handler_transfer_sss3(ctx, amount)
+    }
+
+    /// Initiate a confidential mint — validates authority and recipient allowlist,
+    /// records commitment hash for auditor decryption
+    pub fn confidential_mint_sss3(
+        ctx: Context<ConfidentialMintSss3>,
+        commitment_hash: [u8; 32],
+    ) -> Result<()> {
+        instructions::sss3::handler_confidential_mint(ctx, commitment_hash)
     }
 }
