@@ -51,3 +51,16 @@ services:
     volumes:
       - ${HOME}/.config/solana:/secrets:ro
     restart: unless-stopped
+
+  # ─── Admin Frontend ───────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - mint-burn
+      - event-listener
+      - compliance
+    restart: unless-stopped
