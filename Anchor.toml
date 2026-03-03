@@ -4,9 +4,11 @@ skip-lint = false
 
 [programs.localnet]
 solana_stablecoin_standard = "SSSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+sss_transfer_hook = "SSSHook1111111111111111111111111111111111111"
 
 [programs.devnet]
 solana_stablecoin_standard = "SSSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+sss_transfer_hook = "SSSHook1111111111111111111111111111111111111"
 
 [registry]
 url = "https://api.apr.dev"

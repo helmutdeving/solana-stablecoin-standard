@@ -1,0 +1,21 @@
+[package]
+name = "sss-transfer-hook"
+version = "0.1.0"
+description = "SSS Token-2022 Transfer Hook — enforces SSS-2 compliance on every on-chain transfer"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "sss_transfer_hook"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.30.1"
+anchor-spl = { version = "0.30.1", features = ["token_2022"] }
+solana-stablecoin-standard = { path = "../solana-stablecoin-standard", features = ["cpi"] }
