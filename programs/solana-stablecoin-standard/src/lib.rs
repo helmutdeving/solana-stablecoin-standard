@@ -8,7 +8,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("SSSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+declare_id!("8kY3yQGTdrvPRG3SQfjwyf3SuuUW9Wt1W8zFwURTpa59");
 
 /// Solana Stablecoin Standard (SSS)
 ///

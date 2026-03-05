@@ -3,7 +3,7 @@ resolver = "2"
 members = [
     "programs/solana-stablecoin-standard",
     "programs/sss-transfer-hook",
-    "trident-tests/fuzz_tests/fuzz_0",
-    "trident-tests/fuzz_tests/fuzz_1",
-    "trident-tests/fuzz_tests/fuzz_2",
 ]
+
+[profile.release]
+overflow-checks = true
