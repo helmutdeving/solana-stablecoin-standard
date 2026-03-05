@@ -121,7 +121,7 @@ pub struct InitializeExtraAccountMetaList<'info> {
         init,
         payer = payer,
         space = 8 + ExtraAccountMetaList::LEN,
-        seeds = [b"extra-account-metas", mint.as_ref()],
+        seeds = [b"extra-account-metas", mint.key().as_ref()],
         bump,
     )]
     pub extra_account_meta_list: Account<'info, ExtraAccountMetaList>,
@@ -179,13 +179,12 @@ pub struct Execute<'info> {
     /// FreezeRecord for the source token account owner (optional — None if not frozen)
     /// seeds: ["sss-freeze", mint, source_token_account_authority]
     #[account(
-        optional,
         seeds = [
             b"sss-freeze",
             mint.key().as_ref(),
             source_token_account_authority.key().as_ref(),
         ],
-        bump = freeze_source_owner.bump,
+        bump,
         seeds::program = SSS_PROGRAM_ID,
     )]
     pub freeze_source_owner: Option<Account<'info, SssFreezeRecord>>,
@@ -193,14 +192,13 @@ pub struct Execute<'info> {
     /// FreezeRecord for the destination token account owner (optional)
     /// seeds: ["sss-freeze", mint, destination_owner]
     #[account(
-        optional,
         seeds = [
             b"sss-freeze",
             mint.key().as_ref(),
             // Note: we derive dest owner from dest token account data
             destination_token_account.key().as_ref(),
         ],
-        bump = freeze_dest_owner.bump,
+        bump,
         seeds::program = SSS_PROGRAM_ID,
     )]
     pub freeze_dest_owner: Option<Account<'info, SssFreezeRecord>>,
@@ -208,26 +206,24 @@ pub struct Execute<'info> {
     /// WhitelistRecord for source token account owner (optional)
     /// seeds: ["sss-whitelist", mint, source_token_account_authority]
     #[account(
-        optional,
         seeds = [
             b"sss-whitelist",
             mint.key().as_ref(),
             source_token_account_authority.key().as_ref(),
         ],
-        bump = whitelist_source.bump,
+        bump,
         seeds::program = SSS_PROGRAM_ID,
     )]
     pub whitelist_source: Option<Account<'info, SssWhitelistRecord>>,
 
     /// WhitelistRecord for dest token account owner (optional)
     #[account(
-        optional,
         seeds = [
             b"sss-whitelist",
             mint.key().as_ref(),
             destination_token_account.key().as_ref(),
         ],
-        bump = whitelist_dest.bump,
+        bump,
         seeds::program = SSS_PROGRAM_ID,
     )]
     pub whitelist_dest: Option<Account<'info, SssWhitelistRecord>>,
@@ -347,4 +343,4 @@ pub enum SssHookError {
 
 /// The main SSS program ID — used for PDA cross-program seed derivation
 /// This must match the declared_id of solana-stablecoin-standard
-pub const SSS_PROGRAM_ID: Pubkey = pubkey!("SSSxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+pub const SSS_PROGRAM_ID: Pubkey = pubkey!("8kY3yQGTdrvPRG3SQfjwyf3SuuUW9Wt1W8zFwURTpa59");
