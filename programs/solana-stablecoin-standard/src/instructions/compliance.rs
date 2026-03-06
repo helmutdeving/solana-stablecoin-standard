@@ -5,6 +5,7 @@ use crate::state::*;
 
 #[derive(Accounts)]
 pub struct RecordComplianceEvent<'info> {
+    #[account(mut)]
     pub compliance_officer: Signer<'info>,
 
     #[account(

@@ -9,6 +9,7 @@ use crate::state::*;
 
 #[derive(Accounts)]
 pub struct FreezeAccount<'info> {
+    #[account(mut)]
     pub compliance_officer: Signer<'info>,
 
     #[account(
