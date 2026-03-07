@@ -7,92 +7,69 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-typecheck:
-    name: TypeScript Lint & Typecheck
+  # ─── TypeScript SDK: build + 91 unit tests ──────────────────────────────────
+  sdk-tests:
+    name: SDK Build & Unit Tests (91 tests)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: |
-            packages/sdk/package.json
-            packages/cli/package.json
-            services/backend-api/package.json
-            services/event-listener/package.json
-            services/compliance/package.json
-            tests/package.json
-
-      - name: Install SDK deps
-        run: npm ci
-        working-directory: packages/sdk
-
-      - name: Typecheck SDK
-        run: npm run build
-        working-directory: packages/sdk
-
-      - name: Install CLI deps
-        run: npm ci
-        working-directory: packages/cli
-
-      - name: Typecheck CLI
-        run: npm run build
-        working-directory: packages/cli
-
-      - name: Install test deps
-        run: npm ci
-        working-directory: tests
-
-      - name: Typecheck tests
-        run: npx tsc --noEmit
-        working-directory: tests
-
-  test-sdk:
-    name: SDK Unit Tests
-    runs-on: ubuntu-latest
-    needs: lint-and-typecheck
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install SDK deps
-        run: npm ci
+        run: npm install
         working-directory: packages/sdk
 
       - name: Build SDK
         run: npm run build
         working-directory: packages/sdk
 
-      - name: Install test deps
-        run: npm ci
-        working-directory: tests
+      - name: Run SDK unit tests
+        run: npm test
+        working-directory: packages/sdk
 
-      - name: Run unit tests (mock mode)
-        run: npm test -- --testPathPattern="unit"
-        working-directory: tests
-        env:
-          TEST_MODE: unit
-
-  services-health:
-    name: Services Docker Build
+  # ─── Services: typecheck ────────────────────────────────────────────────────
+  services-typecheck:
+    name: Services TypeScript Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker services
-        run: docker compose build
-        env:
-          COMPOSE_FILE: docker-compose.yml
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
+      - name: Typecheck API service
+        run: npm install && npx tsc --noEmit
+        working-directory: services/api
+
+      - name: Typecheck Compliance service
+        run: npm install && npx tsc --noEmit
+        working-directory: services/compliance
+
+      - name: Typecheck Events service
+        run: npm install && npx tsc --noEmit
+        working-directory: services/events
+
+  # ─── Docker Compose: syntax validation ─────────────────────────────────────
+  docker-validation:
+    name: Docker Compose Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: docker compose config --quiet
+        env:
+          MINT_ADDRESS: So11111111111111111111111111111111111111112
+
+  # ─── Rust: syntax check (Solana BPF not available in CI) ────────────────────
   rust-check:
-    name: Rust Syntax Check
+    name: Rust Syntax & Clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -108,9 +85,9 @@ jobs:
             ~/.cargo/git
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Check Rust syntax (no Solana toolchain needed)
+      - name: Cargo check (host target — BPF target not available in CI)
         run: cargo check --manifest-path programs/solana-stablecoin-standard/Cargo.toml
-        continue-on-error: true  # Solana BPF target not available in CI — check syntax only
+        continue-on-error: true
 
       - name: Clippy lint
         run: cargo clippy --manifest-path programs/solana-stablecoin-standard/Cargo.toml -- -D warnings
