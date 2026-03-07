@@ -11,7 +11,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@sss/sdk": "workspace:*",
+    "@solana-stablecoin-standard/sdk": "workspace:*",
     "@solana/web3.js": "^1.95.0",
     "@solana/spl-token": "^0.4.6",
     "ink": "^4.4.1",
