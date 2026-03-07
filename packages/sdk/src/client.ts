@@ -45,8 +45,11 @@ export class SSSClient {
 
   constructor(provider: AnchorProvider, idl: Idl, programId?: PublicKey) {
     this.provider = provider;
-    this.program = new Program(idl, programId ?? PROGRAM_ID, provider);
-    this.pdas = new PDAs(programId ?? PROGRAM_ID);
+    const resolvedId = programId ?? PROGRAM_ID;
+    // Anchor 0.30+: programId is taken from idl.address — embed it directly
+    const resolvedIdl = { ...idl, address: resolvedId.toString() } as Idl;
+    this.program = new Program(resolvedIdl, provider);
+    this.pdas = new PDAs(resolvedId);
   }
 
   get connection(): Connection {
@@ -62,7 +65,9 @@ export class SSSClient {
   /** Fetch full stablecoin info including optional compliance config */
   async getStablecoin(mint: PublicKey): Promise<StablecoinInfo> {
     const [configPDA] = this.pdas.config(mint);
-    const config = await this.program.account.stablecoinConfig.fetch(configPDA);
+    // Cast to any: TypeScript doesn't infer account names from generic Idl
+    const accounts = this.program.account as any;
+    const config = await accounts.stablecoinConfig.fetch(configPDA);
 
     const isSSS2 = "sss2" in config.preset;
     let compliance: ComplianceConfig | undefined;
@@ -70,7 +75,7 @@ export class SSSClient {
     if (isSSS2) {
       const [compliancePDA] = this.pdas.compliance(mint);
       try {
-        compliance = await this.program.account.complianceConfig.fetch(
+        compliance = await (this.program.account as any).complianceConfig.fetch(
           compliancePDA
         ) as ComplianceConfig;
       } catch {
@@ -126,7 +131,7 @@ export class SSSClient {
   ): Promise<WhitelistRecord | null> {
     const [wlPDA] = this.pdas.whitelist(mint, wallet);
     try {
-      return await this.program.account.whitelistRecord.fetch(wlPDA) as WhitelistRecord;
+      return await (this.program.account as any).whitelistRecord.fetch(wlPDA) as WhitelistRecord;
     } catch {
       return null;
     }
@@ -139,7 +144,7 @@ export class SSSClient {
   ): Promise<FreezeRecord | null> {
     const [freezePDA] = this.pdas.freeze(mint, wallet);
     try {
-      return await this.program.account.freezeRecord.fetch(freezePDA) as FreezeRecord;
+      return await (this.program.account as any).freezeRecord.fetch(freezePDA) as FreezeRecord;
     } catch {
       return null;
     }
@@ -407,7 +412,7 @@ export class SSSClient {
   ): Promise<TransactionSignature> {
     const [configPDA] = this.pdas.config(mint);
     const [compliancePDA] = this.pdas.compliance(mint);
-    const complianceInfo = await this.program.account.complianceConfig.fetch(compliancePDA);
+    const complianceInfo = await (this.program.account as any).complianceConfig.fetch(compliancePDA);
     const [freezePDA] = this.pdas.freeze(mint, wallet);
 
     const walletTokenAccount = getAssociatedTokenAddressSync(
