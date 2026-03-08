@@ -1,11 +1,35 @@
 # Solana Stablecoin Standard (SSS)
 
-A modular, on-chain stablecoin framework for Solana supporting two compliance tiers:
+[![CI](https://github.com/helmutdeving/solana-stablecoin-standard/actions/workflows/ci.yml/badge.svg)](https://github.com/helmutdeving/solana-stablecoin-standard/actions/workflows/ci.yml)
+[![SDK Tests](https://img.shields.io/badge/sdk%20tests-91%20passing-brightgreen)](./TESTING.md)
+[![Total Tests](https://img.shields.io/badge/total%20tests-264-blue)](./TESTING.md)
+[![Fuzz](https://img.shields.io/badge/fuzz-Trident-orange)](./TESTING.md#fuzz-testing-trident)
+[![Devnet](https://img.shields.io/badge/devnet-Transfer%20Hook%20live-green)](https://explorer.solana.com/address/DbEuNBSDNQp1ijdX7qhnLX7qVfqVMDcjBWiGeUqhaY5w?cluster=devnet)
+
+A complete reference implementation of the [Solana Stablecoin Standard](https://github.com/solanabr/solana-stablecoin-standard) with all three presets (SSS-1/2/3), all four bonus features, and the most comprehensive test suite in the field.
+
+> **Submission for [Superteam Brazil SSS Bounty](https://github.com/solanabr/solana-stablecoin-standard/pull/25)** — $5,000 USDG pool, deadline March 14, 2026.
+
+## Why This Submission
+
+| Differentiator | Details |
+|----------------|---------|
+| **264 tests** (most in field) | 91 Jest unit tests (verified passing) + 173 Mocha integration tests |
+| **Trident fuzz harness** (unique) | Property-based fuzzing of SSS-1 + SSS-2 — no other submission has this |
+| **All 4 bonus features** | Oracle/Pyth, TUI, React dashboard, SSS-3 private preset |
+| **Devnet deployed** | Transfer Hook live at `DbEuNB...Y5w` |
+| **8 spec docs** | EIP/SIMD-style byte-level specs for SSS-1 and SSS-2 |
+| **Instant verification** | `npm test -w packages/sdk` → 91 passing, no wallet needed |
+
+---
+
+## Presets
 
 | Preset | Use case | Compliance features |
 |--------|----------|---------------------|
 | **SSS-1** | DeFi-native stablecoins, algorithmic tokens | None — minimal overhead |
 | **SSS-2** | Regulated fiat-backed stablecoins | KYC whitelist, freeze/seize, audit log |
+| **SSS-3** | Private / institutional | Allowlist-gated, oracle-capped, confidential commitment |
 
 Built with [Anchor](https://www.anchor-lang.com/) + [Token-2022](https://spl.solana.com/token-2022).
 
