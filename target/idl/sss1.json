@@ -1,0 +1,3684 @@
+{
+  "address": "8kY3yQGTdrvPRG3SQfjwyf3SuuUW9Wt1W8zFwURTpa59",
+  "metadata": {
+    "name": "solana_stablecoin_standard",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Solana Stablecoin Standard (SSS) — modular on-chain stablecoin framework"
+  },
+  "docs": [
+    "Solana Stablecoin Standard (SSS)",
+    "",
+    "A modular on-chain framework supporting three compliance tiers:",
+    "- SSS-1: Minimal preset — basic mint/burn, supply tracking, no regulatory overhead",
+    "- SSS-2: Compliant preset — adds KYC whitelist, freeze/seize, compliance reporting",
+    "- SSS-3: Private preset (experimental) — allowlist-gated + Token-2022 confidential transfers",
+    "",
+    "Architecture layers:",
+    "L1 — Core ledger: mint authority, burn authority, supply cap",
+    "L2 — Compliance hooks: whitelist registry, freeze registry (SSS-2 only)",
+    "L3 — Privacy layer: allowlist registry, confidential transfer extension (SSS-3 only)",
+    "L4 — Governance: admin multi-sig, preset upgrade path"
+  ],
+  "instructions": [
+    {
+      "name": "allowlist_add",
+      "docs": [
+        "Add a wallet to the SSS-3 allowlist"
+      ],
+      "discriminator": [
+        42,
+        5,
+        129,
+        159,
+        55,
+        165,
+        103,
+        203
+      ],
+      "accounts": [
+        {
+          "name": "allowlist_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sss3_config.mint",
+                "account": "Sss3Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sss3_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  51,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sss3_config.mint",
+                "account": "Sss3Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wallet",
+          "docs": [
+            "The wallet to add to the allowlist"
+          ]
+        },
+        {
+          "name": "allowlist_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  51,
+                  45,
+                  97,
+                  108,
+                  108,
+                  111,
+                  119,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sss3_config.mint",
+                "account": "Sss3Config"
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "expiry",
+          "type": "i64"
+        },
+        {
+          "name": "note",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "allowlist_remove",
+      "docs": [
+        "Remove a wallet from the SSS-3 allowlist"
+      ],
+      "discriminator": [
+        30,
+        20,
+        83,
+        210,
+        188,
+        155,
+        211,
+        163
+      ],
+      "accounts": [
+        {
+          "name": "allowlist_authority",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sss3_config.mint",
+                "account": "Sss3Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sss3_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  51,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sss3_config.mint",
+                "account": "Sss3Config"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wallet"
+        },
+        {
+          "name": "allowlist_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  51,
+                  45,
+                  97,
+                  108,
+                  108,
+                  111,
+                  119,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sss3_config.mint",
+                "account": "Sss3Config"
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "burn_tokens",
+      "docs": [
+        "Burn tokens from an account. SSS-2 enforces whitelist check."
+      ],
+      "discriminator": [
+        76,
+        15,
+        51,
+        254,
+        229,
+        215,
+        121,
+        66
+      ],
+      "accounts": [
+        {
+          "name": "burn_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "holder_token_account",
+          "docs": [
+            "Token account to burn from"
+          ],
+          "writable": true
+        },
+        {
+          "name": "holder_whitelist",
+          "docs": [
+            "SSS-2: whitelist record for holder (optional)"
+          ],
+          "optional": true
+        },
+        {
+          "name": "holder_freeze",
+          "docs": [
+            "SSS-2: freeze record for holder (optional)"
+          ],
+          "optional": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "confidential_mint_sss3",
+      "docs": [
+        "Initiate a confidential mint — validates authority and recipient allowlist,",
+        "records commitment hash for auditor decryption"
+      ],
+      "discriminator": [
+        255,
+        37,
+        166,
+        174,
+        234,
+        36,
+        1,
+        11
+      ],
+      "accounts": [
+        {
+          "name": "mint_authority",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sss3_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  51,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recipient_allowlist",
+          "docs": [
+            "Recipient's allowlist record — must be present and active"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "commitment_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "freeze_account",
+      "docs": [
+        "Freeze an account — halts all transfers for that address (SSS-2 only)"
+      ],
+      "discriminator": [
+        253,
+        75,
+        82,
+        133,
+        167,
+        238,
+        43,
+        130
+      ],
+      "accounts": [
+        {
+          "name": "compliance_officer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wallet"
+        },
+        {
+          "name": "wallet_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "freeze_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  102,
+                  114,
+                  101,
+                  101,
+                  122,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "initialize_sss1",
+      "docs": [
+        "Initialize a new SSS-1 stablecoin (minimal preset)"
+      ],
+      "discriminator": [
+        228,
+        216,
+        212,
+        175,
+        226,
+        214,
+        48,
+        59
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The new token mint. Caller creates and passes this in."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "docs": [
+            "SSS config PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "Sss1Params"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize_sss2",
+      "docs": [
+        "Initialize a new SSS-2 stablecoin (compliant preset)"
+      ],
+      "discriminator": [
+        55,
+        253,
+        209,
+        103,
+        146,
+        222,
+        48,
+        2
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mint",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance",
+          "docs": [
+            "SSS-2 compliance config PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance_vault",
+          "docs": [
+            "Compliance vault — receives seized funds. Must be a token account for this mint."
+          ],
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "Sss2Params"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize_sss3",
+      "docs": [
+        "Initialize a new SSS-3 stablecoin (allowlist-gated + confidential transfers)",
+        "",
+        "The mint should have Token-2022 ConfidentialTransfer extension pre-initialized",
+        "using the SDK helper `initializeConfidentialMint()` before calling this instruction."
+      ],
+      "discriminator": [
+        2,
+        245,
+        16,
+        64,
+        10,
+        249,
+        110,
+        143
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The new token mint (must be created with ConfidentialTransfer extension pre-initialized)"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "docs": [
+            "SSS config PDA (shared structure with SSS-1/SSS-2)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sss3_config",
+          "docs": [
+            "SSS-3 specific config PDA"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  51,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "Sss3Params"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "mint_tokens",
+      "docs": [
+        "Mint tokens to a recipient. SSS-2 enforces whitelist check."
+      ],
+      "discriminator": [
+        59,
+        132,
+        24,
+        246,
+        122,
+        39,
+        8,
+        243
+      ],
+      "accounts": [
+        {
+          "name": "mint_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "recipient_token_account",
+          "docs": [
+            "Recipient's token account"
+          ],
+          "writable": true
+        },
+        {
+          "name": "recipient_whitelist",
+          "optional": true
+        },
+        {
+          "name": "recipient_freeze",
+          "optional": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "record_compliance_event",
+      "docs": [
+        "Record a compliance event (audit trail) (SSS-2 only)"
+      ],
+      "discriminator": [
+        118,
+        186,
+        46,
+        110,
+        113,
+        89,
+        172,
+        244
+      ],
+      "accounts": [
+        {
+          "name": "compliance_officer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "event_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              },
+              {
+                "kind": "account",
+                "path": "compliance.event_count",
+                "account": "ComplianceConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "event",
+          "type": {
+            "defined": {
+              "name": "ComplianceEventData"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "seize_funds",
+      "docs": [
+        "Seize funds from a frozen account to the compliance vault (SSS-2 only)"
+      ],
+      "discriminator": [
+        208,
+        196,
+        46,
+        179,
+        208,
+        86,
+        113,
+        53
+      ],
+      "accounts": [
+        {
+          "name": "compliance_officer",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wallet",
+          "docs": [
+            "The frozen wallet"
+          ]
+        },
+        {
+          "name": "wallet_token_account",
+          "docs": [
+            "Token account of the frozen wallet"
+          ],
+          "writable": true
+        },
+        {
+          "name": "compliance_vault_token_account",
+          "docs": [
+            "Compliance vault token account"
+          ],
+          "writable": true
+        },
+        {
+          "name": "freeze_record",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  102,
+                  114,
+                  101,
+                  101,
+                  122,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "transfer_admin",
+      "docs": [
+        "Transfer admin authority"
+      ],
+      "discriminator": [
+        42,
+        242,
+        66,
+        106,
+        228,
+        10,
+        111,
+        156
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_admin",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "transfer_sss3",
+      "docs": [
+        "Transfer with SSS-3 allowlist enforcement (standard amounts)"
+      ],
+      "discriminator": [
+        131,
+        120,
+        72,
+        21,
+        48,
+        155,
+        160,
+        67
+      ],
+      "accounts": [
+        {
+          "name": "sender",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sss3_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  51,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "sender_token_account",
+          "writable": true
+        },
+        {
+          "name": "recipient_token_account",
+          "writable": true
+        },
+        {
+          "name": "sender_allowlist",
+          "docs": [
+            "Sender's allowlist record (required if require_allowlist_for_send)"
+          ],
+          "optional": true
+        },
+        {
+          "name": "recipient_allowlist",
+          "docs": [
+            "Recipient's allowlist record (required if require_allowlist_for_receive)"
+          ],
+          "optional": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "transfer_tokens",
+      "docs": [
+        "Transfer tokens between accounts. SSS-2 enforces both accounts on whitelist."
+      ],
+      "discriminator": [
+        54,
+        180,
+        238,
+        175,
+        74,
+        85,
+        126,
+        188
+      ],
+      "accounts": [
+        {
+          "name": "sender",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "sender_token_account",
+          "writable": true
+        },
+        {
+          "name": "recipient_token_account",
+          "writable": true
+        },
+        {
+          "name": "sender_whitelist",
+          "optional": true
+        },
+        {
+          "name": "recipient_whitelist",
+          "optional": true
+        },
+        {
+          "name": "sender_freeze",
+          "optional": true
+        },
+        {
+          "name": "recipient_freeze",
+          "optional": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "unfreeze_account",
+      "docs": [
+        "Unfreeze a previously frozen account (SSS-2 only)"
+      ],
+      "discriminator": [
+        28,
+        255,
+        156,
+        206,
+        139,
+        228,
+        5,
+        213
+      ],
+      "accounts": [
+        {
+          "name": "compliance_officer",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wallet"
+        },
+        {
+          "name": "wallet_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "freeze_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  102,
+                  114,
+                  101,
+                  101,
+                  122,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_supply_cap",
+      "docs": [
+        "Update supply cap"
+      ],
+      "discriminator": [
+        9,
+        215,
+        52,
+        77,
+        1,
+        9,
+        162,
+        17
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_cap",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "upgrade_to_sss2",
+      "docs": [
+        "Upgrade preset from SSS-1 to SSS-2 (one-way migration)"
+      ],
+      "discriminator": [
+        99,
+        235,
+        227,
+        22,
+        253,
+        240,
+        173,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "compliance",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance_vault",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "compliance_params",
+          "type": {
+            "defined": {
+              "name": "Sss2ComplianceParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "whitelist_add",
+      "docs": [
+        "Add an address to the KYC whitelist (SSS-2 only)"
+      ],
+      "discriminator": [
+        200,
+        159,
+        194,
+        141,
+        100,
+        114,
+        107,
+        154
+      ],
+      "accounts": [
+        {
+          "name": "compliance_officer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wallet",
+          "docs": [
+            "The wallet to whitelist"
+          ]
+        },
+        {
+          "name": "whitelist_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  119,
+                  104,
+                  105,
+                  116,
+                  101,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "entry",
+          "type": {
+            "defined": {
+              "name": "WhitelistEntry"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "whitelist_remove",
+      "docs": [
+        "Remove an address from the KYC whitelist (SSS-2 only)"
+      ],
+      "discriminator": [
+        202,
+        51,
+        20,
+        101,
+        162,
+        51,
+        190,
+        153
+      ],
+      "accounts": [
+        {
+          "name": "compliance_officer",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "compliance",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wallet"
+        },
+        {
+          "name": "whitelist_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  119,
+                  104,
+                  105,
+                  116,
+                  101,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "config.mint",
+                "account": "StablecoinConfig"
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AllowlistRecord",
+      "discriminator": [
+        2,
+        175,
+        20,
+        1,
+        59,
+        162,
+        161,
+        98
+      ]
+    },
+    {
+      "name": "ComplianceConfig",
+      "discriminator": [
+        157,
+        84,
+        248,
+        198,
+        253,
+        41,
+        75,
+        251
+      ]
+    },
+    {
+      "name": "ComplianceEventRecord",
+      "discriminator": [
+        105,
+        196,
+        8,
+        145,
+        32,
+        106,
+        62,
+        4
+      ]
+    },
+    {
+      "name": "FreezeRecord",
+      "discriminator": [
+        33,
+        176,
+        111,
+        25,
+        29,
+        174,
+        180,
+        197
+      ]
+    },
+    {
+      "name": "Sss3Config",
+      "discriminator": [
+        177,
+        202,
+        36,
+        176,
+        90,
+        255,
+        94,
+        179
+      ]
+    },
+    {
+      "name": "StablecoinConfig",
+      "discriminator": [
+        127,
+        25,
+        244,
+        213,
+        1,
+        192,
+        101,
+        6
+      ]
+    },
+    {
+      "name": "WhitelistRecord",
+      "discriminator": [
+        212,
+        112,
+        61,
+        182,
+        76,
+        232,
+        45,
+        46
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AccountFreezeUpdated",
+      "discriminator": [
+        86,
+        100,
+        54,
+        76,
+        96,
+        157,
+        124,
+        137
+      ]
+    },
+    {
+      "name": "AdminTransferred",
+      "discriminator": [
+        255,
+        147,
+        182,
+        5,
+        199,
+        217,
+        38,
+        179
+      ]
+    },
+    {
+      "name": "AllowlistUpdated",
+      "discriminator": [
+        88,
+        239,
+        93,
+        65,
+        74,
+        140,
+        83,
+        213
+      ]
+    },
+    {
+      "name": "ConfidentialMintInitiated",
+      "discriminator": [
+        186,
+        50,
+        140,
+        133,
+        88,
+        16,
+        28,
+        36
+      ]
+    },
+    {
+      "name": "FundsSeized",
+      "discriminator": [
+        209,
+        57,
+        181,
+        35,
+        228,
+        81,
+        26,
+        2
+      ]
+    },
+    {
+      "name": "PresetUpgraded",
+      "discriminator": [
+        153,
+        79,
+        120,
+        233,
+        98,
+        163,
+        164,
+        234
+      ]
+    },
+    {
+      "name": "StablecoinInitialized",
+      "discriminator": [
+        238,
+        217,
+        135,
+        14,
+        147,
+        33,
+        221,
+        169
+      ]
+    },
+    {
+      "name": "SupplyCapUpdated",
+      "discriminator": [
+        162,
+        231,
+        73,
+        4,
+        93,
+        188,
+        91,
+        148
+      ]
+    },
+    {
+      "name": "TokensBurned",
+      "discriminator": [
+        230,
+        255,
+        34,
+        113,
+        226,
+        53,
+        227,
+        9
+      ]
+    },
+    {
+      "name": "TokensMinted",
+      "discriminator": [
+        207,
+        212,
+        128,
+        194,
+        175,
+        54,
+        64,
+        24
+      ]
+    },
+    {
+      "name": "TokensTransferred",
+      "discriminator": [
+        140,
+        86,
+        106,
+        38,
+        85,
+        157,
+        202,
+        250
+      ]
+    },
+    {
+      "name": "WhitelistUpdated",
+      "discriminator": [
+        205,
+        110,
+        205,
+        193,
+        238,
+        237,
+        220,
+        22
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized: caller does not have the required authority"
+    },
+    {
+      "code": 6001,
+      "name": "Paused",
+      "msg": "Program is globally paused"
+    },
+    {
+      "code": 6002,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidAmount",
+      "msg": "Invalid amount: must be greater than zero"
+    },
+    {
+      "code": 6004,
+      "name": "SupplyCapExceeded",
+      "msg": "Supply cap would be exceeded by this mint"
+    },
+    {
+      "code": 6005,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance to burn"
+    },
+    {
+      "code": 6006,
+      "name": "NotSss2",
+      "msg": "SSS-2 feature not available on SSS-1 preset"
+    },
+    {
+      "code": 6007,
+      "name": "RecipientNotWhitelisted",
+      "msg": "Recipient is not on the KYC whitelist"
+    },
+    {
+      "code": 6008,
+      "name": "SenderNotWhitelisted",
+      "msg": "Sender is not on the KYC whitelist"
+    },
+    {
+      "code": 6009,
+      "name": "AccountFrozen",
+      "msg": "Account is frozen — all operations suspended"
+    },
+    {
+      "code": 6010,
+      "name": "AccountNotFrozen",
+      "msg": "Account is not frozen"
+    },
+    {
+      "code": 6011,
+      "name": "WhitelistExpired",
+      "msg": "Whitelist entry has expired"
+    },
+    {
+      "code": 6012,
+      "name": "AlreadyWhitelisted",
+      "msg": "Whitelist entry already exists for this address"
+    },
+    {
+      "code": 6013,
+      "name": "NotWhitelisted",
+      "msg": "Address is not on the whitelist"
+    },
+    {
+      "code": 6014,
+      "name": "NotSss3",
+      "msg": "SSS-3 feature not available on this preset"
+    },
+    {
+      "code": 6015,
+      "name": "RecipientNotAllowlisted",
+      "msg": "Recipient is not on the SSS-3 allowlist"
+    },
+    {
+      "code": 6016,
+      "name": "SenderNotAllowlisted",
+      "msg": "Sender is not on the SSS-3 allowlist"
+    },
+    {
+      "code": 6017,
+      "name": "AllowlistExpired",
+      "msg": "Allowlist entry has expired"
+    },
+    {
+      "code": 6018,
+      "name": "NotAllowlisted",
+      "msg": "Address is not on the allowlist"
+    },
+    {
+      "code": 6019,
+      "name": "ConfidentialTransfersDisabled",
+      "msg": "Confidential transfers not enabled for this mint"
+    },
+    {
+      "code": 6020,
+      "name": "SupplyCapBelowCirculating",
+      "msg": "New supply cap cannot be lower than current circulating supply"
+    },
+    {
+      "code": 6021,
+      "name": "NoPendingAdmin",
+      "msg": "No pending admin transfer"
+    },
+    {
+      "code": 6022,
+      "name": "CannotDowngrade",
+      "msg": "Cannot downgrade from SSS-2 to SSS-1"
+    },
+    {
+      "code": 6023,
+      "name": "ReasonTooLong",
+      "msg": "Reason string too long (max 128 bytes)"
+    }
+  ],
+  "types": [
+    {
+      "name": "AccountFreezeUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "frozen",
+            "type": "bool"
+          },
+          {
+            "name": "actor",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdminTransferred",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "old_admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllowlistRecord",
+      "docs": [
+        "SSS-3 Allowlist Record",
+        "",
+        "PDA: [\"sss3-allowlist\", mint, wallet]",
+        "Separate from SSS-2 KYC whitelist — access-control focused rather than compliance."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "docs": [
+              "Associated stablecoin mint"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "docs": [
+              "Allowlisted wallet"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "added_at",
+            "docs": [
+              "When added (Unix timestamp)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Expiry (0 = no expiry)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "added_by",
+            "docs": [
+              "Who added this entry"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "active",
+            "docs": [
+              "Is active"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "note",
+            "docs": [
+              "Optional note (e.g. \"institutional partner A\")"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllowlistUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "action",
+            "type": "u8"
+          },
+          {
+            "name": "actor",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ComplianceConfig",
+      "docs": [
+        "─── SSS-2 Compliance Config ────────────────────────────────────────────────",
+        "",
+        "PDA: [\"sss-compliance\", mint]",
+        "Only created for SSS-2 stablecoins."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "docs": [
+              "Associated stablecoin mint"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "compliance_officer",
+            "docs": [
+              "Compliance officer authority (can add/remove whitelist, issue freezes)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "whitelist_transfers",
+            "docs": [
+              "Whether transfers require both sender + recipient to be whitelisted"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "whitelist_mints",
+            "docs": [
+              "Whether minting requires recipient to be whitelisted"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "whitelist_burns",
+            "docs": [
+              "Whether burning requires holder to be whitelisted"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "compliance_vault",
+            "docs": [
+              "Address of the compliance vault (receives seized funds)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "whitelist_count",
+            "docs": [
+              "Total number of whitelist entries"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "freeze_count",
+            "docs": [
+              "Total number of freeze records"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "event_count",
+            "docs": [
+              "Total number of compliance events logged"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ComplianceEventData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "event_type",
+            "type": {
+              "defined": {
+                "name": "ComplianceEventType"
+              }
+            }
+          },
+          {
+            "name": "subject",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "note",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ComplianceEventRecord",
+      "docs": [
+        "─── Compliance Event ────────────────────────────────────────────────────────",
+        "",
+        "PDA: [\"sss-event\", mint, event_id (u64 as [u8;8])]",
+        "Append-only log of compliance actions."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "event_id",
+            "type": "u64"
+          },
+          {
+            "name": "event_type",
+            "type": {
+              "defined": {
+                "name": "ComplianceEventType"
+              }
+            }
+          },
+          {
+            "name": "subject",
+            "type": "pubkey"
+          },
+          {
+            "name": "actor",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "note",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ComplianceEventType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "WhitelistAdded"
+          },
+          {
+            "name": "WhitelistRemoved"
+          },
+          {
+            "name": "AccountFrozen"
+          },
+          {
+            "name": "AccountUnfrozen"
+          },
+          {
+            "name": "FundsSeized"
+          },
+          {
+            "name": "MintBlocked"
+          },
+          {
+            "name": "TransferBlocked"
+          },
+          {
+            "name": "BurnBlocked"
+          },
+          {
+            "name": "ComplianceReportGenerated"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfidentialMintInitiated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient_allowlist_record",
+            "type": "pubkey"
+          },
+          {
+            "name": "commitment_hash",
+            "docs": [
+              "Pedersen commitment hash (ElGamal ciphertext commitment of minted amount)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "initiator",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FreezeRecord",
+      "docs": [
+        "─── Freeze Record ────────────────────────────────────────────────────────",
+        "",
+        "PDA: [\"sss-freeze\", mint, wallet]"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "docs": [
+              "Associated stablecoin mint"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "docs": [
+              "Frozen wallet"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "docs": [
+              "Reason for freeze (max 128 chars)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "frozen_at",
+            "docs": [
+              "When frozen"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "frozen_by",
+            "docs": [
+              "Who froze this account"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "unfrozen_at",
+            "docs": [
+              "If unfrozen, when"
+            ],
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "active",
+            "docs": [
+              "Is still frozen"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundsSeized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "from",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "actor",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Preset",
+      "docs": [
+        "Preset identifier stored on-chain"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Sss1"
+          },
+          {
+            "name": "Sss2"
+          },
+          {
+            "name": "Sss3"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PresetUpgraded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "from_preset",
+            "type": "u8"
+          },
+          {
+            "name": "to_preset",
+            "type": "u8"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sss1Params",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "symbol",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "supply_cap",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sss2ComplianceParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "compliance_officer",
+            "type": "pubkey"
+          },
+          {
+            "name": "whitelist_transfers",
+            "type": "bool"
+          },
+          {
+            "name": "whitelist_mints",
+            "type": "bool"
+          },
+          {
+            "name": "whitelist_burns",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sss2Params",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "symbol",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "supply_cap",
+            "type": "u64"
+          },
+          {
+            "name": "compliance",
+            "type": {
+              "defined": {
+                "name": "Sss2ComplianceParams"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sss3Config",
+      "docs": [
+        "SSS-3 specific configuration",
+        "",
+        "PDA: [\"sss3-config\", mint]",
+        "Only created for SSS-3 stablecoins."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "docs": [
+              "Associated stablecoin mint"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "allowlist_authority",
+            "docs": [
+              "Authority who can add/remove allowlist entries"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "require_allowlist_for_receive",
+            "docs": [
+              "If true, only allowlisted addresses may receive tokens"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "require_allowlist_for_send",
+            "docs": [
+              "If true, only allowlisted addresses may send tokens"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "confidential_transfers_enabled",
+            "docs": [
+              "Whether Token-2022 confidential transfers are enabled for this mint"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "auto_approve_new_accounts",
+            "docs": [
+              "If true, new token accounts are auto-approved for confidential transfers"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "auditor_pubkey",
+            "docs": [
+              "Optional auditor ElGamal pubkey for decrypt-on-demand (32 bytes, None = no auditor)"
+            ],
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          },
+          {
+            "name": "allowlist_count",
+            "docs": [
+              "Total allowlist entries"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sss3Params",
+      "docs": [
+        "SSS-3 initialization params"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "symbol",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "supply_cap",
+            "type": "u64"
+          },
+          {
+            "name": "allowlist_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "require_allowlist_for_receive",
+            "type": "bool"
+          },
+          {
+            "name": "require_allowlist_for_send",
+            "type": "bool"
+          },
+          {
+            "name": "confidential_transfers_enabled",
+            "type": "bool"
+          },
+          {
+            "name": "auto_approve_new_accounts",
+            "type": "bool"
+          },
+          {
+            "name": "auditor_pubkey",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "StablecoinConfig",
+      "docs": [
+        "─── SSS-1 & SSS-2 shared stablecoin config ────────────────────────────────",
+        "",
+        "PDA: [\"sss-config\", mint]"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "preset",
+            "docs": [
+              "Which preset is active"
+            ],
+            "type": {
+              "defined": {
+                "name": "Preset"
+              }
+            }
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "Token mint"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "circulating_supply",
+            "docs": [
+              "Current total supply (tracked off-chain via SPL but mirrored here for fast queries)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "supply_cap",
+            "docs": [
+              "Maximum supply cap (0 = uncapped)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "mint_authority",
+            "docs": [
+              "Mint authority (can create new tokens)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "burn_authority",
+            "docs": [
+              "Burn authority (can destroy tokens)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "docs": [
+              "Admin authority (governs config updates)"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "pending_admin",
+            "docs": [
+              "Pending admin (two-step transfer)"
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "paused",
+            "docs": [
+              "Whether the stablecoin is globally paused"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "decimals",
+            "docs": [
+              "Decimals"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Name (max 32 chars)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "symbol",
+            "docs": [
+              "Symbol (max 8 chars)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "created_at",
+            "docs": [
+              "Creation timestamp"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "total_minted",
+            "docs": [
+              "Total lifetime minted"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_burned",
+            "docs": [
+              "Total lifetime burned"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StablecoinInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "preset",
+            "type": "u8"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "supply_cap",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SupplyCapUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "old_cap",
+            "type": "u64"
+          },
+          {
+            "name": "new_cap",
+            "type": "u64"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensBurned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "holder",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "new_supply",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensMinted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "new_supply",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensTransferred",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "from",
+            "type": "pubkey"
+          },
+          {
+            "name": "to",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "kyc_ref",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistRecord",
+      "docs": [
+        "─── Whitelist Entry ────────────────────────────────────────────────────────",
+        "",
+        "PDA: [\"sss-whitelist\", mint, wallet]"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "docs": [
+              "Associated stablecoin mint"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "docs": [
+              "Whitelisted wallet"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "kyc_ref",
+            "docs": [
+              "Human-readable identifier (e.g. KYC provider + ID hash)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "added_at",
+            "docs": [
+              "When added (Unix timestamp)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "When KYC expires (0 = no expiry)"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "added_by",
+            "docs": [
+              "Who added this entry"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "active",
+            "docs": [
+              "Is this entry active"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "action",
+            "type": "u8"
+          },
+          {
+            "name": "actor",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}

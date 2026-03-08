@@ -1,0 +1,1018 @@
+{
+  "address": "DbEuNBSDNQp1ijdX7qhnLX7qVfqVMDcjBWiGeUqhaY5w",
+  "metadata": {
+    "name": "sss_transfer_hook",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "SSS Token-2022 Transfer Hook — enforces SSS-2 compliance on every on-chain transfer"
+  },
+  "docs": [
+    "SSS Transfer Hook Program",
+    "",
+    "Invoked by Token-2022 on every token transfer for SSS-controlled mints.",
+    "Enforces SSS-2 compliance at the token-program level:",
+    "- Rejects transfers if global pause is active",
+    "- Rejects if source account owner is frozen (`FreezeRecord.active == true`)",
+    "- Rejects if destination account owner is frozen",
+    "- Rejects if `ComplianceConfig.whitelist_transfers` is true and",
+    "sender or receiver is not on the `WhitelistRecord`",
+    "",
+    "This \"fails closed\" architecture means a frozen or non-whitelisted account",
+    "cannot bypass compliance by using any wallet or DEX — the restriction is",
+    "enforced by Token-2022 itself, not just by the SSS program instructions.",
+    "",
+    "PDA seeds for `ExtraAccountMetaList`:",
+    "[\"extra-account-metas\", mint]"
+  ],
+  "instructions": [
+    {
+      "name": "execute",
+      "docs": [
+        "Execute hook — called by Token-2022 on every transfer.",
+        "",
+        "Account layout (in order after the standard transfer-hook accounts):",
+        "0. sss_config           - StablecoinConfig PDA   (read-only)",
+        "1. compliance_config    - ComplianceConfig PDA   (read-only, may be uninitialized for SSS-1)",
+        "2. freeze_source_owner  - FreezeRecord for source token account owner (read-only, optional)",
+        "3. freeze_dest_owner    - FreezeRecord for dest token account owner   (read-only, optional)",
+        "4. whitelist_source     - WhitelistRecord for source owner             (read-only, optional)",
+        "5. whitelist_dest       - WhitelistRecord for dest owner               (read-only, optional)"
+      ],
+      "discriminator": [
+        130,
+        221,
+        242,
+        154,
+        13,
+        193,
+        189,
+        29
+      ],
+      "accounts": [
+        {
+          "name": "source_token_account",
+          "docs": [
+            "Source token account (owned by Token-2022)"
+          ]
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The mint"
+          ]
+        },
+        {
+          "name": "destination_token_account",
+          "docs": [
+            "Destination token account"
+          ]
+        },
+        {
+          "name": "source_token_account_authority",
+          "docs": [
+            "Owner / delegate of source token account"
+          ]
+        },
+        {
+          "name": "extra_account_meta_list",
+          "docs": [
+            "Validation state account (extra account meta list)",
+            "seeds: [\"extra-account-metas\", mint]"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  120,
+                  116,
+                  114,
+                  97,
+                  45,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sss_config",
+          "docs": [
+            "SSS StablecoinConfig — global config for this mint",
+            "seeds: [\"sss-config\", mint]"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                115,
+                40,
+                228,
+                157,
+                219,
+                93,
+                213,
+                138,
+                146,
+                32,
+                65,
+                172,
+                144,
+                108,
+                64,
+                240,
+                21,
+                9,
+                109,
+                107,
+                154,
+                227,
+                163,
+                9,
+                146,
+                186,
+                191,
+                196,
+                0,
+                86,
+                86,
+                76
+              ]
+            }
+          }
+        },
+        {
+          "name": "compliance_config",
+          "docs": [
+            "SSS ComplianceConfig — only present for SSS-2 mints",
+            "seeds: [\"sss-compliance\", mint]"
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  99,
+                  111,
+                  109,
+                  112,
+                  108,
+                  105,
+                  97,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                115,
+                40,
+                228,
+                157,
+                219,
+                93,
+                213,
+                138,
+                146,
+                32,
+                65,
+                172,
+                144,
+                108,
+                64,
+                240,
+                21,
+                9,
+                109,
+                107,
+                154,
+                227,
+                163,
+                9,
+                146,
+                186,
+                191,
+                196,
+                0,
+                86,
+                86,
+                76
+              ]
+            }
+          }
+        },
+        {
+          "name": "freeze_source_owner",
+          "docs": [
+            "FreezeRecord for the source token account owner (optional — None if not frozen)",
+            "seeds: [\"sss-freeze\", mint, source_token_account_authority]"
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  102,
+                  114,
+                  101,
+                  101,
+                  122,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "account",
+                "path": "source_token_account_authority"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                115,
+                40,
+                228,
+                157,
+                219,
+                93,
+                213,
+                138,
+                146,
+                32,
+                65,
+                172,
+                144,
+                108,
+                64,
+                240,
+                21,
+                9,
+                109,
+                107,
+                154,
+                227,
+                163,
+                9,
+                146,
+                186,
+                191,
+                196,
+                0,
+                86,
+                86,
+                76
+              ]
+            }
+          }
+        },
+        {
+          "name": "freeze_dest_owner",
+          "docs": [
+            "FreezeRecord for the destination token account owner (optional)",
+            "seeds: [\"sss-freeze\", mint, destination_owner]"
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  102,
+                  114,
+                  101,
+                  101,
+                  122,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "account",
+                "path": "destination_token_account"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                115,
+                40,
+                228,
+                157,
+                219,
+                93,
+                213,
+                138,
+                146,
+                32,
+                65,
+                172,
+                144,
+                108,
+                64,
+                240,
+                21,
+                9,
+                109,
+                107,
+                154,
+                227,
+                163,
+                9,
+                146,
+                186,
+                191,
+                196,
+                0,
+                86,
+                86,
+                76
+              ]
+            }
+          }
+        },
+        {
+          "name": "whitelist_source",
+          "docs": [
+            "WhitelistRecord for source token account owner (optional)",
+            "seeds: [\"sss-whitelist\", mint, source_token_account_authority]"
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  119,
+                  104,
+                  105,
+                  116,
+                  101,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "account",
+                "path": "source_token_account_authority"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                115,
+                40,
+                228,
+                157,
+                219,
+                93,
+                213,
+                138,
+                146,
+                32,
+                65,
+                172,
+                144,
+                108,
+                64,
+                240,
+                21,
+                9,
+                109,
+                107,
+                154,
+                227,
+                163,
+                9,
+                146,
+                186,
+                191,
+                196,
+                0,
+                86,
+                86,
+                76
+              ]
+            }
+          }
+        },
+        {
+          "name": "whitelist_dest",
+          "docs": [
+            "WhitelistRecord for dest token account owner (optional)"
+          ],
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  115,
+                  115,
+                  45,
+                  119,
+                  104,
+                  105,
+                  116,
+                  101,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              },
+              {
+                "kind": "account",
+                "path": "destination_token_account"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                115,
+                40,
+                228,
+                157,
+                219,
+                93,
+                213,
+                138,
+                146,
+                32,
+                65,
+                172,
+                144,
+                108,
+                64,
+                240,
+                21,
+                9,
+                109,
+                107,
+                154,
+                227,
+                163,
+                9,
+                146,
+                186,
+                191,
+                196,
+                0,
+                86,
+                86,
+                76
+              ]
+            }
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_extra_account_meta_list",
+      "docs": [
+        "Initialize extra account meta list for a mint.",
+        "Called once per mint by the SSS admin during mint initialization.",
+        "Stores the PDAs the hook needs as extra accounts on every transfer."
+      ],
+      "discriminator": [
+        92,
+        197,
+        174,
+        197,
+        41,
+        124,
+        19,
+        3
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "The Token-2022 mint for which we are setting up the hook"
+          ]
+        },
+        {
+          "name": "extra_account_meta_list",
+          "docs": [
+            "ExtraAccountMetaList PDA — stored by Token-2022 standard",
+            "seeds: [\"extra-account-metas\", mint]"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  120,
+                  116,
+                  114,
+                  97,
+                  45,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_mint",
+          "type": "pubkey"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ExtraAccountMetaList",
+      "discriminator": [
+        115,
+        178,
+        214,
+        90,
+        158,
+        58,
+        38,
+        201
+      ]
+    },
+    {
+      "name": "SssComplianceConfig",
+      "discriminator": [
+        45,
+        249,
+        88,
+        44,
+        242,
+        124,
+        253,
+        115
+      ]
+    },
+    {
+      "name": "SssFreezeRecord",
+      "discriminator": [
+        224,
+        74,
+        147,
+        249,
+        235,
+        22,
+        70,
+        6
+      ]
+    },
+    {
+      "name": "SssStablecoinConfig",
+      "discriminator": [
+        156,
+        222,
+        148,
+        140,
+        54,
+        80,
+        63,
+        47
+      ]
+    },
+    {
+      "name": "SssWhitelistRecord",
+      "discriminator": [
+        250,
+        131,
+        46,
+        10,
+        220,
+        4,
+        98,
+        109
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "GloballyPaused",
+      "msg": "Transfer rejected: stablecoin is globally paused"
+    },
+    {
+      "code": 6001,
+      "name": "SourceAccountFrozen",
+      "msg": "Transfer rejected: source account is frozen by compliance officer"
+    },
+    {
+      "code": 6002,
+      "name": "DestinationAccountFrozen",
+      "msg": "Transfer rejected: destination account is frozen by compliance officer"
+    },
+    {
+      "code": 6003,
+      "name": "SourceNotWhitelisted",
+      "msg": "Transfer rejected: source wallet is not on the KYC whitelist"
+    },
+    {
+      "code": 6004,
+      "name": "DestinationNotWhitelisted",
+      "msg": "Transfer rejected: destination wallet is not on the KYC whitelist"
+    },
+    {
+      "code": 6005,
+      "name": "WhitelistEntryExpired",
+      "msg": "Transfer rejected: KYC whitelist entry has expired — re-verification required"
+    }
+  ],
+  "types": [
+    {
+      "name": "ExtraAccountMetaList",
+      "docs": [
+        "Extra account meta list storage",
+        "Stores which extra accounts the hook requires on every transfer call."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SssComplianceConfig",
+      "docs": [
+        "Mirror of solana-stablecoin-standard::state::ComplianceConfig"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "compliance_officer",
+            "type": "pubkey"
+          },
+          {
+            "name": "whitelist_transfers",
+            "type": "bool"
+          },
+          {
+            "name": "whitelist_mints",
+            "type": "bool"
+          },
+          {
+            "name": "whitelist_burns",
+            "type": "bool"
+          },
+          {
+            "name": "compliance_vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "whitelist_count",
+            "type": "u32"
+          },
+          {
+            "name": "freeze_count",
+            "type": "u32"
+          },
+          {
+            "name": "event_count",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SssFreezeRecord",
+      "docs": [
+        "Mirror of solana-stablecoin-standard::state::FreezeRecord"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "frozen_at",
+            "type": "i64"
+          },
+          {
+            "name": "frozen_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "unfrozen_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SssPreset",
+      "docs": [
+        "Mirror of solana-stablecoin-standard::state::Preset"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Sss1"
+          },
+          {
+            "name": "Sss2"
+          },
+          {
+            "name": "Sss3"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SssStablecoinConfig",
+      "docs": [
+        "Mirror of solana-stablecoin-standard::state::StablecoinConfig",
+        "PDA: [\"sss-config\", mint] in the main SSS program"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "preset",
+            "type": {
+              "defined": {
+                "name": "SssPreset"
+              }
+            }
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "circulating_supply",
+            "type": "u64"
+          },
+          {
+            "name": "supply_cap",
+            "type": "u64"
+          },
+          {
+            "name": "mint_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "burn_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "pending_admin",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "symbol",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "total_minted",
+            "type": "u64"
+          },
+          {
+            "name": "total_burned",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SssWhitelistRecord",
+      "docs": [
+        "Mirror of solana-stablecoin-standard::state::WhitelistRecord"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "kyc_ref",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "added_at",
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "type": "i64"
+          },
+          {
+            "name": "added_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}
